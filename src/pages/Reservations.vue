@@ -5,12 +5,24 @@
       model-name="branches"
       :filter-data="{ accepts_reservations: true }"
       :model-includes="['sections', 'sections.tables']"
-    />
+    >
+      <template #header>
+        <div class="flex justify-end bg-white px-6 py-4">
+          <f-btn
+            text-color="#4f4f4f"
+            color="#e5e7eb"
+            label="Add Branches"
+            :outline="true"
+          />
+        </div>
+      </template>
+    </GenericList>
   </div>
 </template>
 
 <script>
 import GenericList from "@/components/GenericList.vue";
+import FBtn from "@/components/FBtn.vue";
 
 export default {
   name: "ReservationsPage",
@@ -45,6 +57,7 @@ export default {
     };
   },
   components: {
+    FBtn,
     GenericList,
   },
 };
