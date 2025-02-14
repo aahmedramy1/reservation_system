@@ -4,6 +4,7 @@
     class="generic-list overflow-auto h-full rounded shadow-md"
     @scroll="throttledOnScroll"
   >
+    <slot name="header"></slot>
     <table
       class="min-w-full divide-y divide-gray-200 table-auto border border-gray-200 border-x-0"
     >
