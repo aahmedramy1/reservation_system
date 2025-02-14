@@ -1,5 +1,9 @@
 <template>
-  <div class="generic-list overflow-x-auto">
+  <div
+    ref="scrollContainer"
+    class="generic-list overflow-auto h-full border border-gray-200 rounded"
+    @scroll="throttledOnScroll"
+  >
     <table class="min-w-full divide-y divide-gray-200 table-auto">
       <thead class="bg-gray-50">
         <tr>
@@ -14,7 +18,7 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="(item, rowIndex) in items" :key="rowIndex">
+        <tr v-for="(item, rowIndex) in displayItems" :key="rowIndex">
           <td
             v-for="(column, colIndex) in columns"
             :key="colIndex"
@@ -26,11 +30,13 @@
         </tr>
       </tbody>
     </table>
+    <div v-if="loading" class="py-4 text-center text-gray-600">Loading...</div>
   </div>
 </template>
 
 <script>
 import api from "@/api/axios";
+import throttle from "lodash/throttle";
 
 export default {
   name: "genericList",
@@ -47,6 +53,10 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    filterData: {
+      type: Object,
+      default: () => ({}),
+    },
     columns: {
       type: Array,
       required: true,
@@ -55,11 +65,24 @@ export default {
   data() {
     return {
       items: [],
+      loading: false,
+      nextPageUrl: null,
+      throttledOnScroll: null,
     };
   },
   computed: {
     cellWidth() {
       return 100 / this.columns.length + "%";
+    },
+    displayItems() {
+      return this.items.filter((item) => {
+        return Object.entries(this.filterData).every(([field, value]) => {
+          if (value === null || value === undefined || value === "") {
+            return true;
+          }
+          return item[field] === value;
+        });
+      });
     },
   },
   methods: {
@@ -70,7 +93,7 @@ export default {
       return item[column.field];
     },
     buildUrl() {
-      let endpoint = `/${this.modelName}`;
+      const endpoint = `/${this.modelName}`;
       const params = new URLSearchParams();
 
       if (this.modelIncludes && Array.isArray(this.modelIncludes)) {
@@ -80,31 +103,81 @@ export default {
       }
 
       if (this.baseScope && typeof this.baseScope === "object") {
-        Object.keys(this.baseScope).forEach((key) => {
-          params.append(`filter[${key}]`, this.baseScope[key]);
+        Object.entries(this.baseScope).forEach(([key, value]) => {
+          params.append(`filter[${key}]`, value);
         });
       }
 
-      const queryString = params.toString();
-      if (queryString) {
-        endpoint += `?${queryString}`;
-      }
-      return endpoint;
+      return params.toString() ? `${endpoint}?${params.toString()}` : endpoint;
     },
-    fetchData() {
-      const url = this.buildUrl();
+    fetchData(url) {
+      if (this.loading) return;
+
+      this.loading = true;
+      const requestUrl = url ? url.split("v5")[1] : this.buildUrl();
+
       api
-        .get(url)
+        .get(requestUrl)
         .then((response) => {
-          this.items = response.data.data;
+          const responseData = response.data;
+          if (Array.isArray(responseData.data)) {
+            this.items = [...this.items, ...responseData.data];
+          }
+          this.nextPageUrl = responseData.links?.next || null;
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
+        })
+        .finally(() => {
+          this.loading = false;
+          this.checkIfShouldFetchMore();
         });
+    },
+    onScroll() {
+      const container = this.$refs.scrollContainer;
+      if (!container) return;
+
+      const scrollThreshold = 150;
+      if (
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - scrollThreshold
+      ) {
+        if (this.nextPageUrl && !this.loading) {
+          this.fetchData(this.nextPageUrl);
+        }
+      }
+    },
+    checkIfShouldFetchMore() {
+      this.$nextTick(() => {
+        const container = this.$refs.scrollContainer;
+        if (
+          container &&
+          container.scrollHeight <= container.clientHeight &&
+          this.nextPageUrl &&
+          !this.loading
+        ) {
+          this.fetchData(this.nextPageUrl);
+        }
+      });
+    },
+  },
+  watch: {
+    displayItems() {
+      this.checkIfShouldFetchMore();
+    },
+    filterData: {
+      deep: true,
+      handler() {
+        this.checkIfShouldFetchMore();
+      },
     },
   },
   created() {
     this.fetchData();
+    this.throttledOnScroll = throttle(this.onScroll, 200);
+  },
+  updated() {
+    this.checkIfShouldFetchMore();
   },
 };
 </script>
