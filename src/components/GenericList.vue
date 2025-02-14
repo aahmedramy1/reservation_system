@@ -1,19 +1,21 @@
 <template>
   <div
     ref="scrollContainer"
-    class="generic-list overflow-auto h-full border border-gray-200 rounded"
+    class="generic-list overflow-auto h-full rounded shadow-md"
     @scroll="throttledOnScroll"
   >
-    <table class="min-w-full divide-y divide-gray-200 table-auto">
-      <thead class="bg-gray-50">
+    <table
+      class="min-w-full divide-y divide-gray-200 table-auto border border-gray-200 border-x-0"
+    >
+      <thead class="bg-white">
         <tr>
           <th
             v-for="(column, index) in columns"
             :key="index"
             :style="{ width: cellWidth }"
-            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            class="px-6 py-3 text-left font-bold text-black tracking-wider text-sm"
           >
-            {{ column.label }}
+            {{ _.startCase(column.label) }}
           </th>
         </tr>
       </thead>
@@ -36,7 +38,6 @@
 
 <script>
 import api from "@/api/axios";
-import throttle from "lodash/throttle";
 
 export default {
   name: "genericList",
@@ -174,7 +175,7 @@ export default {
   },
   created() {
     this.fetchData();
-    this.throttledOnScroll = throttle(this.onScroll, 200);
+    this.throttledOnScroll = this._.throttle(this.onScroll, 200);
   },
   updated() {
     this.checkIfShouldFetchMore();
