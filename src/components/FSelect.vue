@@ -8,9 +8,18 @@
       @click="toggleOpen"
       class="cursor-pointer border rounded-md px-3 py-2 bg-white flex justify-between items-center"
     >
-      <span v-if="selectedLabels.length" class="truncate">
-        {{ selectedLabels.join(", ") }}
-      </span>
+      <div
+        v-if="selectedLabels.length"
+        class="flex flex-wrap gap-2 max-w-[25vw]"
+      >
+        <span
+          v-for="(label, index) in selectedLabels"
+          :key="index"
+          class="border border-blue-400 rounded-md p-1"
+        >
+          {{ label }}
+        </span>
+      </div>
       <span v-else class="text-gray-400">
         {{ placeholder }}
       </span>
