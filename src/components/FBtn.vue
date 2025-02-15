@@ -3,8 +3,10 @@
     :style="computedStyles"
     :class="computedClasses"
     @click="$emit('click')"
+    :disabled="loading"
   >
-    {{ label }}
+    <span v-if="loading" class="loader"></span>
+    <span v-else>{{ label }}</span>
   </button>
 </template>
 
@@ -28,14 +30,19 @@ export default {
       type: String,
       default: "",
     },
+    loading: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     computedClasses() {
       return [
-        "rounded-md px-4 py-2 font-medium transition",
+        "rounded-md px-4 py-2 font-medium transition flex items-center justify-center",
         this.outline
           ? "border-2 bg-transparent hover:opacity-80"
           : "hover:opacity-80",
+        this.loading ? "cursor-not-allowed opacity-50" : "",
       ];
     },
     computedStyles() {
@@ -48,3 +55,23 @@ export default {
   },
 };
 </script>
+
+<style>
+.loader {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>
