@@ -25,3 +25,22 @@ export async function fetchAllBranches({ commit }, { modelIncludes }) {
     commit("setLoading", false);
   }
 }
+
+export async function enableReservationsForBranches({ commit }, { branchIds }) {
+  try {
+    const requests = branchIds.map((id) =>
+      api.put(`/branches/${id}`, { accepts_reservations: true })
+    );
+    const responses = await Promise.all(requests);
+
+    commit("updateBranches", {
+      branchIds,
+      changes: { accepts_reservations: true },
+    });
+
+    return responses;
+  } catch (error) {
+    console.error("Failed to update branch reservations:", error);
+    throw error;
+  }
+}

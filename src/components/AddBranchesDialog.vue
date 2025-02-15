@@ -25,7 +25,7 @@
         text-color="#ffffff"
         color="#440099"
         label="Save"
-        @click="$emit('close')"
+        @click="addBranches"
       />
     </footer>
   </div>
@@ -52,6 +52,18 @@ export default {
         }`,
         value: branch.id,
       }));
+    },
+  },
+  methods: {
+    async addBranches() {
+      try {
+        await this.$store.dispatch("branches/enableReservationsForBranches", {
+          branchIds: this.selectedValues,
+        });
+        this.$emit("close");
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
 };
