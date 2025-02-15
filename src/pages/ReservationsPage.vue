@@ -1,5 +1,5 @@
 <template>
-  <div class="px-12 py-6 bg-gray-100">
+  <div class="px-12 py-6 bg-gray-100 min-h-[80vh]">
     <BranchesList>
       <template #header>
         <div class="flex justify-end bg-white px-6 py-4">
