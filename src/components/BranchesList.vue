@@ -21,7 +21,12 @@
         </tr>
       </thead>
       <tbody v-if="!loading" class="bg-white divide-y divide-gray-200">
-        <tr v-for="(branch, rowIndex) in filteredBranches" :key="rowIndex">
+        <tr
+          v-for="(branch, rowIndex) in filteredBranches"
+          :key="rowIndex"
+          class="cursor-pointer"
+          @click="$emit('row-click', branch)"
+        >
           <td
             v-for="(column, colIndex) in columns"
             :key="colIndex"
