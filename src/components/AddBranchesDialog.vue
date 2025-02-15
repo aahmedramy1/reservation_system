@@ -50,15 +50,14 @@ export default {
   },
   computed: {
     branchOptions() {
-      let branches = this.$store.getters["branches/branches"];
-      return branches
-        .filter((branch) => !branch.accepts_reservations)
-        .map((branch) => ({
-          label: `${branch.name}${
-            branch.reference ? ` (${branch.reference})` : ""
-          }`,
-          value: branch.id,
-        }));
+      let branches =
+        this.$store.getters["branches/branchesNotAcceptingReservations"];
+      return branches.map((branch) => ({
+        label: `${branch.name}${
+          branch.reference ? ` (${branch.reference})` : ""
+        }`,
+        value: branch.id,
+      }));
     },
     isUpdatingBranches() {
       return this.$store.getters["branches/isUpdatingBranches"];

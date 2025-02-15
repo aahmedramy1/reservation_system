@@ -49,12 +49,14 @@ export async function enableReservationsForBranches({ commit }, { branchIds }) {
   }
 }
 
-export async function disableReservationsForAllBranches({ commit, state }) {
+export async function disableReservationsForAllBranches({
+  commit,
+  rootGetters,
+}) {
   commit("setUpdatingBranches", true);
 
-  const updatableBranches = state.branches.filter(
-    (branch) => branch.accepts_reservations
-  );
+  const updatableBranches =
+    rootGetters["branches/branchesAcceptingReservations"];
   const branchIds = updatableBranches.map((branch) => branch.id);
 
   try {

@@ -9,3 +9,11 @@ export function isFetchingBranches(state) {
 export function isUpdatingBranches(state) {
   return state.isUpdatingBranches;
 }
+
+export function branchesAcceptingReservations(state) {
+  return state.branches.filter((branch) => branch.accepts_reservations);
+}
+
+export function branchesNotAcceptingReservations(state) {
+  return state.branches.filter((branch) => !branch.accepts_reservations);
+}
