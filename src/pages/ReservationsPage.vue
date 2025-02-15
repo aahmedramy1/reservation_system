@@ -8,20 +8,33 @@
             color="#e5e7eb"
             label="Add Branches"
             :outline="true"
+            @click="showAddBranchesDialog = true"
           />
         </div>
       </template>
     </BranchesList>
+    <FDialog v-model="showAddBranchesDialog">
+      <AddBranchesDialog @close="showAddBranchesDialog = false" />
+    </FDialog>
   </div>
 </template>
 
 <script>
 import FBtn from "@/components/FBtn.vue";
 import BranchesList from "@/components/BranchesList.vue";
+import FDialog from "@/components/FDialog.vue";
+import AddBranchesDialog from "@/components/AddBranchesDialog.vue";
 
 export default {
   name: "ReservationsPage",
+  data() {
+    return {
+      showAddBranchesDialog: false,
+    };
+  },
   components: {
+    AddBranchesDialog,
+    FDialog,
     BranchesList,
     FBtn,
   },

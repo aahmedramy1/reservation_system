@@ -8,7 +8,7 @@
         class="fixed inset-0 bg-black opacity-50"
         @click="handleBackdropClick"
       ></div>
-      <div class="bg-white rounded shadow-lg relative z-10 p-4" @click.stop>
+      <div class="bg-white rounded-lg shadow-lg relative z-10" @click.stop>
         <slot></slot>
       </div>
     </div>
