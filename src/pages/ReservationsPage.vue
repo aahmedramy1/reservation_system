@@ -9,13 +9,13 @@
             label="Add Branches"
             class="min-w-[5vw]"
             :outline="true"
-            :loading="loading"
+            :loading="isFetchingBranches"
             @click="showAddBranchesDialog = true"
           />
         </div>
       </template>
     </BranchesList>
-    <FDialog v-model="showAddBranchesDialog">
+    <FDialog v-model="showAddBranchesDialog" :persistent="isUpdatingBranches">
       <AddBranchesDialog @close="showAddBranchesDialog = false" />
     </FDialog>
   </div>
@@ -35,8 +35,11 @@ export default {
     };
   },
   computed: {
-    loading() {
-      return this.$store.getters["branches/loading"];
+    isFetchingBranches() {
+      return this.$store.getters["branches/isFetchingBranches"];
+    },
+    isUpdatingBranches() {
+      return this.$store.getters["branches/isUpdatingBranches"];
     },
   },
   components: {

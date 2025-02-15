@@ -2,7 +2,7 @@ import api from "@/api/axios";
 import { buildUrl } from "@/utils";
 
 export async function fetchAllBranches({ commit }, { modelIncludes }) {
-  commit("setLoading", true);
+  commit("setFetchingBranches", true);
   let requestUrl = buildUrl({ modelName: "branches", modelIncludes });
 
   try {
@@ -22,11 +22,12 @@ export async function fetchAllBranches({ commit }, { modelIncludes }) {
   } catch (err) {
     console.error("API Error:", err.response?.data || err.message || err);
   } finally {
-    commit("setLoading", false);
+    commit("setFetchingBranches", false);
   }
 }
 
 export async function enableReservationsForBranches({ commit }, { branchIds }) {
+  commit("setUpdatingBranches", true);
   try {
     const requests = branchIds.map((id) =>
       api.put(`/branches/${id}`, { accepts_reservations: true })
@@ -42,5 +43,7 @@ export async function enableReservationsForBranches({ commit }, { branchIds }) {
   } catch (error) {
     console.error("Failed to update branch reservations:", error);
     throw error;
+  } finally {
+    commit("setUpdatingBranches", false);
   }
 }

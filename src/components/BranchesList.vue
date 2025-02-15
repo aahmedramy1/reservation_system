@@ -80,7 +80,7 @@ export default {
       return this.$store.getters["branches/branches"];
     },
     loading() {
-      return this.$store.getters["branches/loading"];
+      return this.$store.getters["branches/isFetchingBranches"];
     },
     cellWidthStyle() {
       return `width: ${100 / this.columns.length}%`;

@@ -18,6 +18,7 @@
         color="#e5e7eb"
         label="Cancel"
         :outline="true"
+        :loading="isUpdatingBranches"
         @click="$emit('close')"
       />
       <f-btn
@@ -25,6 +26,7 @@
         text-color="#ffffff"
         color="#440099"
         label="Save"
+        :loading="isUpdatingBranches"
         @click="addBranches"
       />
     </footer>
@@ -54,6 +56,9 @@ export default {
           }`,
           value: branch.id,
         }));
+    },
+    isUpdatingBranches() {
+      return this.$store.getters["branches/isUpdatingBranches"];
     },
   },
   methods: {

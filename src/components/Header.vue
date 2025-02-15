@@ -19,7 +19,7 @@ export default {
   components: { FBtn },
   computed: {
     loading() {
-      return this.$store.getters["branches/loading"];
+      return this.$store.getters["branches/isFetchingBranches"];
     },
   },
 };
