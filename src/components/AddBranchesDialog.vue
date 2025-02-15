@@ -46,12 +46,14 @@ export default {
   computed: {
     branchOptions() {
       let branches = this.$store.getters["branches/branches"];
-      return branches.map((branch) => ({
-        label: `${branch.name}${
-          branch.reference ? ` (${branch.reference})` : ""
-        }`,
-        value: branch.id,
-      }));
+      return branches
+        .filter((branch) => !branch.accepts_reservations)
+        .map((branch) => ({
+          label: `${branch.name}${
+            branch.reference ? ` (${branch.reference})` : ""
+          }`,
+          value: branch.id,
+        }));
     },
   },
   methods: {
