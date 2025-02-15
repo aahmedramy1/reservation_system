@@ -3,7 +3,7 @@
     :style="computedStyles"
     :class="computedClasses"
     @click="$emit('click')"
-    :disabled="loading"
+    :disabled="loading || disabled"
   >
     <span v-if="loading" class="loader"></span>
     <span v-else>{{ label }}</span>
@@ -34,6 +34,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     computedClasses() {
@@ -42,7 +46,7 @@ export default {
         this.outline
           ? "border-2 bg-transparent hover:opacity-80"
           : "hover:opacity-80",
-        this.loading ? "cursor-not-allowed opacity-50" : "",
+        this.loading || this.disabled ? "cursor-not-allowed opacity-50" : "",
       ];
     },
     computedStyles() {
