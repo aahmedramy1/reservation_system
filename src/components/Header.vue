@@ -7,6 +7,7 @@
       class="min-w-[5vw]"
       label="Disable Reservations"
       :loading="isFetchingBranches"
+      :disabled="isFetchingBranches || isEmptyBranches"
       @click="showDisableReservationsDialog = true"
     />
     <FDialog
@@ -39,6 +40,12 @@ export default {
     },
     isUpdatingBranches() {
       return this.$store.getters["branches/isUpdatingBranches"];
+    },
+    branchesAcceptingReservations() {
+      return this.$store.getters["branches/branchesAcceptingReservations"];
+    },
+    isEmptyBranches() {
+      return this.branchesAcceptingReservations.length === 0;
     },
   },
 };
