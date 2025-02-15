@@ -29,6 +29,7 @@
         color="#440099"
         label="Save"
         :loading="isUpdatingBranches"
+        :disabled="selectedValues.length === 0"
         @click="addBranches"
       />
     </footer>
