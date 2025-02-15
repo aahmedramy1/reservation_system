@@ -7,7 +7,9 @@
             text-color="#4f4f4f"
             color="#e5e7eb"
             label="Add Branches"
+            class="min-w-[5vw]"
             :outline="true"
+            :loading="loading"
             @click="showAddBranchesDialog = true"
           />
         </div>
@@ -31,6 +33,11 @@ export default {
     return {
       showAddBranchesDialog: false,
     };
+  },
+  computed: {
+    loading() {
+      return this.$store.getters["branches/loading"];
+    },
   },
   components: {
     AddBranchesDialog,
