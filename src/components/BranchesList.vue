@@ -34,6 +34,13 @@
       </tbody>
     </table>
 
+    <div
+      v-if="!loading && filteredBranches.length === 0"
+      class="py-4 text-center text-gray-600"
+    >
+      No branches available
+    </div>
+
     <div v-if="loading" class="py-4 text-center text-gray-600">Loading...</div>
   </div>
 </template>
