@@ -1,6 +1,6 @@
 <template>
   <div class="min-w-[30vw]">
-    <header class="flex justify-start p-4">
+    <header class="flex justify-start p-4 border border-x-0 border-t-0">
       <div class="font-bold text-2xl">Add Branches</div>
     </header>
     <div class="bg-gray-100 px-4 py-6">
@@ -11,7 +11,9 @@
         v-model="selectedValues"
       />
     </div>
-    <footer class="flex justify-end gap-3 items-center p-4">
+    <footer
+      class="flex justify-end gap-3 items-center p-4 border border-x-0 border-b-0"
+    >
       <f-btn
         class="min-w-[5rem]"
         text-color="#4f4f4f"
