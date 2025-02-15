@@ -16,8 +16,6 @@
 </template>
 
 <script>
-import _ from "lodash";
-
 export default {
   name: "FDialog",
   model: {
@@ -46,11 +44,11 @@ export default {
         this.closeDialog();
       }
     },
-    handleKeydown: _.throttle((event) => {
+    handleKeydown(event) {
       if (event.key === "Escape" && !this.persistent && this.modelValue) {
         this.closeDialog();
       }
-    }, 300),
+    },
     closeDialog() {
       this.$emit("update:modelValue", false);
     },
