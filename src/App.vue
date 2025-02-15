@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import ReservationsPage from "@/pages/Reservations.vue";
+import ReservationsPage from "@/pages/ReservationsPage.vue";
 import ReservationsHeader from "@/components/Header.vue";
 
 export default {
