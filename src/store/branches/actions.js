@@ -29,14 +29,44 @@ export async function fetchAllBranches({ commit }, { modelIncludes }) {
 export async function enableReservationsForBranches({ commit }, { branchIds }) {
   commit("setUpdatingBranches", true);
   try {
-    const requests = branchIds.map((id) =>
-      api.put(`/branches/${id}`, { accepts_reservations: true })
+    let responses = await Promise.all(
+      branchIds.map((branchId) =>
+        api.put(`/branches/${branchId}`, { accepts_reservations: true })
+      )
     );
-    const responses = await Promise.all(requests);
 
     commit("updateBranches", {
       branchIds,
       changes: { accepts_reservations: true },
+    });
+
+    return responses;
+  } catch (error) {
+    console.error("Failed to update branch reservations:", error);
+    throw error;
+  } finally {
+    commit("setUpdatingBranches", false);
+  }
+}
+
+export async function disableReservationsForAllBranches({ commit, state }) {
+  commit("setUpdatingBranches", true);
+
+  const updatableBranches = state.branches.filter(
+    (branch) => branch.accepts_reservations
+  );
+  const branchIds = updatableBranches.map((branch) => branch.id);
+
+  try {
+    const responses = await Promise.all(
+      branchIds.map((id) =>
+        api.put(`/branches/${id}`, { accepts_reservations: false })
+      )
+    );
+
+    commit("updateBranches", {
+      branchIds,
+      changes: { accepts_reservations: false },
     });
 
     return responses;

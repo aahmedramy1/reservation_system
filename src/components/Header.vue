@@ -6,20 +6,39 @@
       color="#440099"
       class="min-w-[5vw]"
       label="Disable Reservations"
-      :loading="loading"
+      :loading="isFetchingBranches"
+      @click="showDisableReservationsDialog = true"
     />
+    <FDialog
+      v-model="showDisableReservationsDialog"
+      :persistent="isUpdatingBranches"
+    >
+      <DisableReservationsDialog
+        @close="showDisableReservationsDialog = false"
+      />
+    </FDialog>
   </header>
 </template>
 
 <script>
 import FBtn from "@/components/FBtn.vue";
+import FDialog from "@/components/FDialog.vue";
+import DisableReservationsDialog from "@/components/DisableReservationsDialog.vue";
 
 export default {
   name: "ReservationsHeader",
-  components: { FBtn },
+  components: { DisableReservationsDialog, FDialog, FBtn },
+  data() {
+    return {
+      showDisableReservationsDialog: false,
+    };
+  },
   computed: {
-    loading() {
+    isFetchingBranches() {
       return this.$store.getters["branches/isFetchingBranches"];
+    },
+    isUpdatingBranches() {
+      return this.$store.getters["branches/isUpdatingBranches"];
     },
   },
 };
