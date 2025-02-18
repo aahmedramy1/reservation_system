@@ -1,7 +1,7 @@
 <template>
   <div class="min-w-[30vw]">
     <header class="flex justify-start p-4 border border-x-0 border-t-0">
-      <div class="font-bold text-2xl">Add Branches</div>
+      <div class="font-bold text-xl">Add Branches</div>
     </header>
     <div class="bg-gray-100 px-4 py-6">
       <FSelect

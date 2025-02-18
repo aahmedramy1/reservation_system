@@ -1,13 +1,11 @@
 <template>
   <div class="min-w-[30vw]">
     <header class="flex justify-start p-4 border border-t-0 border-x-0">
-      <div class="font-bold text-2xl">Disable Reservations</div>
+      <div class="font-bold text-xl">Disable Reservations</div>
     </header>
 
-    <div class="p-4">
-      <div class="text-lg text-gray-600">
-        Are you sure you want to disable reservations for all branches?
-      </div>
+    <div class="p-4 text-lg text-gray-600">
+      Are you sure you want to disable reservations for all branches?
     </div>
 
     <footer
