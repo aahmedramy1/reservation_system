@@ -18,7 +18,7 @@
     <FDialog v-model="showAddBranchesDialog" :persistent="isUpdatingBranches">
       <AddBranchesDialog @close="showAddBranchesDialog = false" />
     </FDialog>
-    <FDialog v-model="showEditBranchDialog">
+    <FDialog v-model="showEditBranchDialog" :persistent="editBranchLoading">
       <EditBranchDialog
         @close="showEditBranchDialog = false"
         :branch="branchToEdit"
@@ -49,6 +49,9 @@ export default {
     },
     isUpdatingBranches() {
       return this.$store.getters["branches/isUpdatingBranches"];
+    },
+    editBranchLoading() {
+      return this.isUpdatingBranches || this.$store.getters["tables/loading"];
     },
   },
   components: {

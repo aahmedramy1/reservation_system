@@ -86,3 +86,18 @@ export async function updateTablesInBranch(
 ) {
   commit("updateTablesInBranchId", { branchId, tableIds, changes });
 }
+
+export async function updateBranchData({ commit }, { branchId, changes }) {
+  commit("setUpdatingBranches", true);
+  try {
+    const response = await api.put(`/branches/${branchId}`, changes);
+    commit("updateBranches", { branchIds: [branchId], changes });
+
+    return response;
+  } catch (error) {
+    console.error("Failed to update branch:", error);
+    throw error;
+  } finally {
+    commit("setUpdatingBranches", false);
+  }
+}

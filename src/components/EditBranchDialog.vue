@@ -23,6 +23,7 @@
           id="quantity"
           name="quantity"
           class="border rounded-md p-2 appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          v-model.number="branchToEdit.reservation_duration"
         />
       </div>
       <FSelect
@@ -72,6 +73,7 @@
         color="#e5e7eb"
         label="Close"
         :outline="true"
+        :loading="loading"
         @click="$emit('close')"
       />
       <f-btn
@@ -79,6 +81,7 @@
         text-color="#ffffff"
         color="#440099"
         label="Save"
+        :loading="loading"
         @click="handleSave"
       />
     </footer>
@@ -90,7 +93,7 @@ import FBtn from "@/components/FBtn.vue";
 import FSelect from "@/components/FSelect.vue";
 import "vue2-timepicker/dist/VueTimepicker.css";
 import BranchTimePicker from "@/components/BranchTimePicker.vue";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 
 export default {
   name: "EditBranchDialog",
@@ -112,12 +115,6 @@ export default {
       branchToEdit: cloneDeep(this.branch),
     };
   },
-  created() {
-    this.daySlots = this.DAYS.map((day) => ({
-      day,
-      timeSlots: [],
-    }));
-  },
   props: {
     branch: {
       type: Object,
@@ -125,6 +122,12 @@ export default {
     },
   },
   computed: {
+    loading() {
+      return (
+        this.$store.getters["branches/isUpdatingBranches"] ||
+        this.$store.getters["tables/loading"]
+      );
+    },
     branchToEditTables() {
       return (
         this.branchToEdit.sections?.flatMap((section) => section.tables) || []
@@ -143,8 +146,33 @@ export default {
         ) ?? []
       );
     },
+    branchToEditReservationTimes() {
+      return this.branchToEdit.reservation_times;
+    },
   },
   watch: {
+    branchToEditReservationTimes: {
+      immediate: true,
+      deep: true,
+      handler(reservationTimes) {
+        this.daySlots = this.DAYS.map((day) => {
+          if (reservationTimes[day.toLowerCase()]) {
+            return {
+              day,
+              timeSlots: reservationTimes[day.toLowerCase()].map((time) => ({
+                start: time[0],
+                end: time[1],
+              })),
+            };
+          } else {
+            return {
+              day,
+              timeSlots: [],
+            };
+          }
+        });
+      },
+    },
     branchToEditTables: {
       immediate: true,
       deep: true,
@@ -165,6 +193,59 @@ export default {
     },
   },
   methods: {
+    validateReservationTimes(reservationTimes) {
+      const isValidTimeFormat = (time) =>
+        /^([01]\d|2[0-3]):([0-5]\d)$/.test(time);
+      let errors = [];
+
+      for (const day in reservationTimes) {
+        let timeSlots = reservationTimes[day];
+
+        let parsedSlots = timeSlots.map(([start, end], index) => {
+          if (!isValidTimeFormat(start) || !isValidTimeFormat(end)) {
+            errors.push(
+              `❌ Invalid time format in ${day}: "${start} - ${end}". Please use HH:mm format.`
+            );
+            return null;
+          }
+          const [startHour, startMinute] = start.split(":").map(Number);
+          const [endHour, endMinute] = end.split(":").map(Number);
+
+          const startTime = startHour * 60 + startMinute;
+          const endTime = endHour * 60 + endMinute;
+
+          return { startTime, endTime, original: [start, end], index };
+        });
+
+        if (parsedSlots.includes(null)) continue;
+
+        for (const slot of parsedSlots) {
+          if (slot.endTime <= slot.startTime) {
+            errors.push(
+              `⏳ Invalid time range in ${day}: "${slot.original[0]} - ${slot.original[1]}". ` +
+                `The end time must be later than the start time.`
+            );
+          }
+        }
+
+        parsedSlots.sort((a, b) => a.startTime - b.startTime);
+
+        for (let i = 1; i < parsedSlots.length; i++) {
+          if (parsedSlots[i].startTime < parsedSlots[i - 1].endTime) {
+            errors.push(
+              `⚠️ Overlapping time slots in ${day}: ` +
+                `"${parsedSlots[i - 1].original[0]} - ${
+                  parsedSlots[i - 1].original[1]
+                }" ` +
+                `and "${parsedSlots[i].original[0]} - ${parsedSlots[i].original[1]}". ` +
+                `Please adjust your time slots to avoid conflicts.`
+            );
+          }
+        }
+      }
+
+      return errors.length ? errors.join("\n") : 1;
+    },
     addTimeSlot(dayIndex) {
       if (this.daySlots[dayIndex].timeSlots.length < 3) {
         this.daySlots[dayIndex].timeSlots.push({
@@ -177,6 +258,17 @@ export default {
       this.daySlots[dayIndex].timeSlots.splice(slotIndex, 1);
     },
     async handleSave() {
+      if (
+        this.branchToEdit.reservation_duration == null ||
+        this.branchToEdit.reservation_duration === ""
+      ) {
+        this.$notify({
+          type: "error",
+          title: "Error",
+          text: "Reservation duration is required",
+        });
+        return;
+      }
       const newTables = this.selectedTables.filter(
         (table) => !this.oldSelectedTables.includes(table)
       );
@@ -186,6 +278,21 @@ export default {
       );
 
       try {
+        let reservationTimes = {};
+
+        this.daySlots.forEach((dayObject) => {
+          reservationTimes[dayObject.day.toLowerCase()] =
+            dayObject.timeSlots.map((time) => [time.start, time.end]);
+        });
+        const validationError = this.validateReservationTimes(reservationTimes);
+        if (validationError !== 1) {
+          this.$notify({
+            type: "error",
+            title: "Error",
+            text: validationError,
+          });
+          return;
+        }
         await this.$store.dispatch("tables/updateReservationsForTables", {
           branchId: this.branchToEdit.id,
           tableIds: newTables,
@@ -197,10 +304,34 @@ export default {
           tableIds: removedTables,
           acceptsReservations: false,
         });
+
+        let newChanges = {};
+
+        if (
+          this.branchToEdit.reservation_duration !==
+          this.branch.reservation_duration
+        ) {
+          newChanges.reservation_duration =
+            this.branchToEdit.reservation_duration;
+        }
+
+        if (!isEqual(this.branchToEdit.reservation_times, reservationTimes)) {
+          newChanges.reservation_times = reservationTimes;
+        }
+
+        if (Object.keys(newChanges).length) {
+          await this.$store.dispatch("branches/updateBranchData", {
+            branchId: this.branchToEdit.id,
+            changes: {
+              reservation_times: reservationTimes,
+              reservation_duration: this.branchToEdit.reservation_duration,
+            },
+          });
+        }
+
+        this.$emit("close");
       } catch (error) {
         console.error(error);
-      } finally {
-        this.$emit("close");
       }
     },
   },

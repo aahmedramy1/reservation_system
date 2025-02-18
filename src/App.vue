@@ -2,6 +2,7 @@
   <div>
     <ReservationsHeader />
     <ReservationsPage />
+    <notifications position="bottom center" />
   </div>
 </template>
 
