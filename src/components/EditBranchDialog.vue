@@ -38,9 +38,18 @@
           :key="dayObj.day"
           class="flex flex-col gap-1"
         >
-          <h3 class="text-sm font-medium text-gray-700">
-            {{ dayObj.day }}
-          </h3>
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-medium text-gray-700">
+              {{ dayObj.day }}
+            </h3>
+            <button
+              v-if="dayIndex === 0"
+              class="text-[#440099] text-sm"
+              @click="applyDayToAll(dayIndex)"
+            >
+              Apply on all days
+            </button>
+          </div>
           <div
             class="bg-white px-3 py-2 border rounded-md flex justify-between items-center"
           >
@@ -193,6 +202,13 @@ export default {
     },
   },
   methods: {
+    applyDayToAll(dayIndex) {
+      const dayToApply = this.daySlots[dayIndex];
+      this.daySlots = this.daySlots.map((day) => ({
+        ...day,
+        timeSlots: dayToApply.timeSlots.map((time) => ({ ...time })),
+      }));
+    },
     validateReservationTimes(reservationTimes) {
       const isValidTimeFormat = (time) =>
         /^([01]\d|2[0-3]):([0-5]\d)$/.test(time);
