@@ -79,3 +79,10 @@ export async function disableReservationsForAllBranches({
     commit("setUpdatingBranches", false);
   }
 }
+
+export async function updateTablesInBranch(
+  { commit },
+  { branchId, tableIds, changes }
+) {
+  commit("updateTablesInBranchId", { branchId, tableIds, changes });
+}

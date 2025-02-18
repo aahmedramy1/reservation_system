@@ -2,7 +2,7 @@
   <div class="min-w-[32vw] flex flex-col h-[80vh]">
     <header class="flex justify-start p-4 border border-t-0 border-x-0">
       <div class="font-bold text-xl">
-        Edit {{ branch.name }} branch reservation settings
+        Edit {{ branchToEdit.name }} branch reservation settings
       </div>
     </header>
 
@@ -11,8 +11,8 @@
         class="text-[#5672C6] bg-[#DBEAFE] border border-[#5580C5] border-x-0 pl-4 py-2"
       >
         Branch working hours are
-        {{ branch.opening_from }} -
-        {{ branch.opening_to }}
+        {{ branchToEdit.opening_from }} -
+        {{ branchToEdit.opening_to }}
       </div>
       <div class="flex flex-col gap-2">
         <label for="quantity" class="text-gray-700 font-medium text-sm">
@@ -79,6 +79,7 @@
         text-color="#ffffff"
         color="#440099"
         label="Save"
+        @click="handleSave"
       />
     </footer>
   </div>
@@ -89,6 +90,7 @@ import FBtn from "@/components/FBtn.vue";
 import FSelect from "@/components/FSelect.vue";
 import "vue2-timepicker/dist/VueTimepicker.css";
 import BranchTimePicker from "@/components/BranchTimePicker.vue";
+import { cloneDeep } from "lodash";
 
 export default {
   name: "EditBranchDialog",
@@ -96,6 +98,7 @@ export default {
   data() {
     return {
       selectedTables: [],
+      oldSelectedTables: [],
       DAYS: [
         "Saturday",
         "Sunday",
@@ -106,6 +109,7 @@ export default {
         "Friday",
       ],
       daySlots: [],
+      branchToEdit: cloneDeep(this.branch),
     };
   },
   created() {
@@ -121,12 +125,17 @@ export default {
     },
   },
   computed: {
+    branchToEditTables() {
+      return (
+        this.branchToEdit.sections?.flatMap((section) => section.tables) || []
+      );
+    },
     branchTables() {
       return this.branch.sections?.flatMap((section) => section.tables) || [];
     },
     tableOptions() {
       return (
-        this.branch.sections?.flatMap((section) =>
+        this.branchToEdit.sections?.flatMap((section) =>
           section.tables.map((table) => ({
             label: `${section.name} - ${table.name}`,
             value: table.id,
@@ -136,11 +145,20 @@ export default {
     },
   },
   watch: {
-    branchTables: {
+    branchToEditTables: {
       immediate: true,
       deep: true,
       handler(branchTables) {
         this.selectedTables = branchTables
+          .filter((table) => table.accepts_reservations)
+          .map((table) => table.id);
+      },
+    },
+    branchTables: {
+      immediate: true,
+      deep: true,
+      handler(branchTables) {
+        this.oldSelectedTables = branchTables
           .filter((table) => table.accepts_reservations)
           .map((table) => table.id);
       },
@@ -157,6 +175,33 @@ export default {
     },
     removeTimeSlot(dayIndex, slotIndex) {
       this.daySlots[dayIndex].timeSlots.splice(slotIndex, 1);
+    },
+    async handleSave() {
+      const newTables = this.selectedTables.filter(
+        (table) => !this.oldSelectedTables.includes(table)
+      );
+
+      const removedTables = this.oldSelectedTables.filter(
+        (table) => !this.selectedTables.includes(table)
+      );
+
+      try {
+        await this.$store.dispatch("tables/updateReservationsForTables", {
+          branchId: this.branchToEdit.id,
+          tableIds: newTables,
+          acceptsReservations: true,
+        });
+
+        await this.$store.dispatch("tables/updateReservationsForTables", {
+          branchId: this.branchToEdit.id,
+          tableIds: removedTables,
+          acceptsReservations: false,
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.$emit("close");
+      }
     },
   },
 };

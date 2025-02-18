@@ -18,6 +18,31 @@ export function updateBranches(state, { branchIds, changes }) {
   });
 }
 
+export function updateTablesInBranchId(state, { branchId, tableIds, changes }) {
+  state.branches = state.branches.map((branch) => {
+    if (branch.id === branchId) {
+      return {
+        ...branch,
+        sections: branch.sections.map((section) => {
+          return {
+            ...section,
+            tables: section.tables.map((table) => {
+              if (tableIds.includes(table.id)) {
+                return {
+                  ...table,
+                  ...changes,
+                };
+              }
+              return table;
+            }),
+          };
+        }),
+      };
+    }
+    return branch;
+  });
+}
+
 export function setFetchingBranches(state, isFetching) {
   state.isFetchingBranches = isFetching;
 }
