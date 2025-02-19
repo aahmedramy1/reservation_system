@@ -42,31 +42,36 @@
       v-if="isOpen"
       class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto"
     >
-      <div
-        v-for="(option, index) in options"
-        :key="index"
-        @click.stop="selectOption(option)"
-        class="cursor-pointer hover:bg-gray-100 select-none relative py-2 pl-3 pr-9"
-      >
-        <span class="block truncate">
-          {{ option.label }}
-        </span>
-        <span
-          v-if="isSelected(option)"
-          class="absolute inset-y-0 right-0 flex items-center pr-4"
+      <div v-if="options.length">
+        <div
+          v-for="(option, index) in options"
+          :key="index"
+          @click.stop="selectOption(option)"
+          class="cursor-pointer hover:bg-gray-100 select-none relative py-2 pl-3 pr-9"
         >
-          <svg
-            class="h-5 w-5 text-[#440099]"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+          <span class="block truncate">
+            {{ option.label }}
+          </span>
+          <span
+            v-if="isSelected(option)"
+            class="absolute inset-y-0 right-0 flex items-center pr-4"
           >
-            <path
-              fill-rule="evenodd"
-              d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 10-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </span>
+            <svg
+              class="h-5 w-5 text-[#440099]"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 10-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div v-else>
+        <div class="py-2 pl-3">No options available</div>
       </div>
     </div>
   </div>
